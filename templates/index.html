@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Prompt Management System{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="welcome-banner">
+        <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+        <p>Manage your L1 and L2 prompts with real-time database synchronization</p>
+    </div>
+
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-list-ol"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="stat-l1">0</h3>
+                <p>L1 Prompts</p>
+            </div>
+            <a href="{{ url_for('l1_prompts') }}" class="stat-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-list-ul"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="stat-l2">0</h3>
+                <p>L2 Prompts</p>
+            </div>
+            <a href="{{ url_for('l2_prompts') }}" class="stat-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="stat-active">0</h3>
+                <p>Active Prompts</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3 id="stat-clients">0</h3>
+                <p>Unique Clients</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="{{ url_for('l1_prompts') }}" class="action-btn">
+                <i class="fas fa-plus"></i>
+                <span>Add L1 Prompt</span>
+            </a>
+            <a href="{{ url_for('l2_prompts') }}" class="action-btn">
+                <i class="fas fa-plus"></i>
+                <span>Add L2 Prompt</span>
+            </a>
+            <button onclick="loadFromSupabase()" class="action-btn">
+                <i class="fas fa-sync"></i>
+                <span>Sync from Supabase</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="recent-activity">
+        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+        <div class="activity-list" id="activity-list">
+            <div class="activity-item">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Loading activities...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStatistics();
+        loadRecentActivity();
+        
+        // Auto-refresh statistics every 30 seconds
+        setInterval(loadStatistics, 30000);
+    });
+    
+    async function loadStatistics() {
+        try {
+            const response = await fetch('/api/statistics');
+            const data = await response.json();
+            
+            document.getElementById('stat-l1').textContent = data.total_l1;
+            document.getElementById('stat-l2').textContent = data.total_l2;
+            document.getElementById('stat-active').textContent = data.active_prompts;
+            document.getElementById('stat-clients').textContent = data.unique_clients;
+        } catch (error) {
+            console.error('Error loading statistics:', error);
+        }
+    }
+    
+    async function loadRecentActivity() {
+        try {
+            // This would typically come from an API endpoint
+            const activityList = document.getElementById('activity-list');
+            activityList.innerHTML = `
+                <div class="activity-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>System initialized and ready</span>
+                    <span class="activity-time">Just now</span>
+                </div>
+                <div class="activity-item">
+                    <i class="fas fa-database"></i>
+                    <span>Connected to real-time database</span>
+                    <span class="activity-time">Just now</span>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error loading activities:', error);
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Edit L2 Prompt{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-pencil"></i> Edit L2 Prompt</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="prompt_id" class="form-label">Prompt ID</label>
+                            <input type="text" class="form-control" id="prompt_id" 
+                                   value="{{ prompt.PromptID }}" disabled>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="l1_prompt_id" class="form-label">L1 Parent Prompt</label>
+                            <select class="form-select" id="l1_prompt_id" name="l1_prompt_id">
+                                <option value="">No Parent</option>
+                                {% for l1 in l1_prompts %}
+                                <option value="{{ l1.PromptID }}" 
+                                        {% if prompt.L1_PromptID == l1.PromptID %}selected{% endif %}>
+                                    {{ l1.PromptID }} - {{ l1.L1_Prompt[:50] }}...
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="l2_prompt" class="form-label">L2 Prompt Text *</label>
+                        <textarea class="form-control" id="l2_prompt" name="l2_prompt" 
+                                  rows="8" required>{{ prompt.L2_Prompt }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="heading" class="form-label">Heading</label>
+                            <input type="text" class="form-control" id="heading" name="heading" 
+                                   value="{{ prompt.Heading or '' }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="subheading" class="form-label">Subheading</label>
+                            <input type="text" class="form-control" id="subheading" name="subheading" 
+                                   value="{{ prompt.Subheading or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="client_id" class="form-label">Client ID</label>
+                            <input type="text" class="form-control" id="client_id" name="client_id" 
+                                   value="{{ prompt.ClientId or '' }}">
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="category_uid" class="form-label">Category UID</label>
+                            <input type="text" class="form-control" id="category_uid" name="category_uid" 
+                                   value="{{ prompt.CategoryUID or '' }}">
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="model" name="model" 
+                                   value="{{ prompt.Model or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="">Select Priority</option>
+                                {% for i in range(1, 6) %}
+                                <option value="{{ i }}" {% if prompt.Priority == i %}selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="orders" class="form-label">Orders</label>
+                            <input type="text" class="form-control" id="orders" name="orders" 
+                                   value="{{ prompt.Orders or '' }}">
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Render</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="render" 
+                                           id="render_y" value="Y" {% if prompt.Render == 'Y' %}checked{% endif %}>
+                                    <label class="form-check-label" for="render_y">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="render" 
+                                           id="render_n" value="N" {% if prompt.Render != 'Y' %}checked{% endif %}>
+                                    <label class="form-check-label" for="render_n">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Active</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="is_active" 
+                                           id="active" value="Y" {% if prompt.IsActive == 'Y' %}checked{% endif %}>
+                                    <label class="form-check-label" for="active">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="is_active" 
+                                           id="inactive" value="N" {% if prompt.IsActive != 'Y' %}checked{% endif %}>
+                                    <label class="form-check-label" for="inactive">No</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('l2_prompts') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Update Prompt
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

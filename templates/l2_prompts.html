@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}L2 Prompts{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-2-circle"></i> L2 Prompts</h1>
+    <a href="{{ url_for('add_l2') }}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Add New L2
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="search" placeholder="Search prompts, headings..." 
+                       value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="l1_prompt">
+                    <option value="">All L1 Prompts</option>
+                    {% for l1 in l1_prompts %}
+                    <option value="{{ l1.PromptID }}" {% if selected_l1 == l1.PromptID %}selected{% endif %}>
+                        {{ l1.PromptID }} - {{ l1.L1_Prompt[:30] }}...
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="client">
+                    <option value="">All Clients</option>
+                    {% for client in clients %}
+                    <option value="{{ client }}" {% if selected_client == client %}selected{% endif %}>
+                        {{ client }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="bi bi-search"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Prompts Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Heading</th>
+                        <th>L1 Parent</th>
+                        <th>Client</th>
+                        <th>Model</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prompt in prompts %}
+                    <tr>
+                        <td><strong>#{{ prompt.id }}</strong></td>
+                        <td>
+                            {{ prompt.Heading or 'No Heading' }}
+                            {% if prompt.Subheading %}
+                            <br><small class="text-muted">{{ prompt.Subheading }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if prompt.L1PromptDetails %}
+                            <span class="badge bg-primary" title="{{ prompt.L1PromptDetails.L1_Prompt }}">
+                                {{ prompt.L1PromptDetails.PromptID }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">No Parent</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if prompt.ClientId %}
+                            <span class="badge bg-info">{{ prompt.ClientId }}</span>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if prompt.Model %}
+                            <span class="badge bg-secondary">{{ prompt.Model }}</span>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if prompt.Priority %}
+                            <span class="badge bg-{{ 'danger' if prompt.Priority >= 3 else 'warning' if prompt.Priority == 2 else 'info' }}">
+                                {{ prompt.Priority }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if prompt.IsActive == 'Y' else 'danger' }}">
+                                {{ 'Active' if prompt.IsActive == 'Y' else 'Inactive' }}
+                            </span>
+                            <br>
+                            <small class="text-muted">{{ prompt.Render }}</small>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('edit_l2', prompt_id=prompt.id) }}" 
+                                   class="btn btn-outline-success">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('delete_l2', prompt_id=prompt.id) }}" 
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('Delete this prompt?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-info" 
+                                        onclick="showPromptPreview('{{ prompt.L2_Prompt|replace("'", "\\'")|escape }}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox display-1"></i><br>
+                            No prompts found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Prompt Preview Modal -->
+<div class="modal fade" id="promptPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Prompt Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="promptPreviewContent" class="bg-light p-3 rounded" style="white-space: pre-wrap;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showPromptPreview(promptText) {
+    document.getElementById('promptPreviewContent').textContent = promptText;
+    new bootstrap.Modal(document.getElementById('promptPreviewModal')).show();
+}
+</script>
+{% endblock %}

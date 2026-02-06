@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Prompt{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header {% if prompt_type == 'l1' %}bg-primary{% else %}bg-success{% endif %} text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> 
+                    Add New {{ 'L1' if prompt_type == 'l1' else 'L2' }} Prompt
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% if prompt_type == 'l1' %}
+                    <!-- L1 Form -->
+                    <div class="mb-3">
+                        <label for="prompt_id" class="form-label">Prompt ID *</label>
+                        <input type="text" class="form-control" id="prompt_id" name="prompt_id" 
+                               required placeholder="e.g., PROMPT_001">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="l1_prompt" class="form-label">L1 Prompt Text *</label>
+                        <textarea class="form-control" id="l1_prompt" name="l1_prompt" 
+                                  rows="6" required placeholder="Enter the L1 prompt text..."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="client_id" class="form-label">Client ID</label>
+                            <input type="text" class="form-control" id="client_id" name="client_id" 
+                                   placeholder="Optional">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_active" 
+                                       id="active" value="Y" checked>
+                                <label class="form-check-label" for="active">Active</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_active" 
+                                       id="inactive" value="N">
+                                <label class="form-check-label" for="inactive">Inactive</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% else %}
+                    <!-- L2 Form -->
+                    <div class="mb-3">
+                        <label for="prompt_id" class="form-label">Prompt ID *</label>
+                        <input type="text" class="form-control" id="prompt_id" name="prompt_id" 
+                               required placeholder="e.g., L2_PROMPT_001">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="l1_prompt_id" class="form-label">L1 Parent Prompt</label>
+                        <select class="form-select" id="l1_prompt_id" name="l1_prompt_id">
+                            <option value="">No Parent</option>
+                            {% for l1 in l1_prompts %}
+                            <option value="{{ l1.PromptID }}">
+                                {{ l1.PromptID }} - {{ l1.L1_Prompt[:50] }}...
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="l2_prompt" class="form-label">L2 Prompt Text *</label>
+                        <textarea class="form-control" id="l2_prompt" name="l2_prompt" 
+                                  rows="8" required placeholder="Enter the L2 prompt text..."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="heading" class="form-label">Heading</label>
+                            <input type="text" class="form-control" id="heading" name="heading" 
+                                   placeholder="Optional">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="subheading" class="form-label">Subheading</label>
+                            <input type="text" class="form-control" id="subheading" name="subheading" 
+                                   placeholder="Optional">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="client_id" class="form-label">Client ID</label>
+                            <input type="text" class="form-control" id="client_id" name="client_id" 
+                                   placeholder="Optional">
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="category_uid" class="form-label">Category UID</label>
+                            <input type="text" class="form-control" id="category_uid" name="category_uid" 
+                                   placeholder="Optional">
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="model" name="model" 
+                                   placeholder="e.g., GPT-4, Claude">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="">Select Priority</option>
+                                {% for i in range(1, 6) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="orders" class="form-label">Orders</label>
+                            <input type="text" class="form-control" id="orders" name="orders" 
+                                   placeholder="Optional">
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Render</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="render" 
+                                           id="render_y" value="Y" checked>
+                                    <label class="form-check-label" for="render_y">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="render" 
+                                           id="render_n" value="N">
+                                    <label class="form-check-label" for="render_n">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Active</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="is_active" 
+                                           id="active" value="Y" checked>
+                                    <label class="form-check-label" for="active">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="is_active" 
+                                           id="inactive" value="N">
+                                    <label class="form-check-label" for="inactive">No</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn {% if prompt_type == 'l1' %}btn-primary{% else %}btn-success{% endif %}">
+                            <i class="bi bi-check-circle"></i> Create Prompt
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

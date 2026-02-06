@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Stats Cards -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total L1 Prompts</h6>
+                        <h2 class="mb-0">{{ l1_count }}</h2>
+                    </div>
+                    <i class="bi bi-1-circle display-6"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total L2 Prompts</h6>
+                        <h2 class="mb-0">{{ l2_count }}</h2>
+                    </div>
+                    <i class="bi bi-2-circle display-6"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Active Prompts</h6>
+                        <h2 class="mb-0">{{ l1_count + l2_count }}</h2>
+                    </div>
+                    <i class="bi bi-check-circle display-6"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Database</h6>
+                        <h6 class="mb-0">Supabase</h6>
+                    </div>
+                    <i class="bi bi-cloud-check display-6"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent L1 Prompts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Recent L1 Prompts
+                    <a href="{{ url_for('l1_prompts') }}" class="btn btn-sm btn-light float-end">View All</a>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_l1 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Prompt</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prompt in recent_l1 %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('edit_l1', prompt_id=prompt.PromptID) }}" class="text-decoration-none">
+                                        {{ prompt.PromptID[:15] }}...
+                                    </a>
+                                </td>
+                                <td>{{ prompt.L1_Prompt[:50] }}...</td>
+                                <td>{{ prompt.ClientId or 'N/A' }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if prompt.IsActive == 'Y' else 'danger' }}">
+                                        {{ 'Active' if prompt.IsActive == 'Y' else 'Inactive' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No L1 prompts found</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent L2 Prompts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Recent L2 Prompts
+                    <a href="{{ url_for('l2_prompts') }}" class="btn btn-sm btn-light float-end">View All</a>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_l2 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Heading</th>
+                                <th>L1 Parent</th>
+                                <th>Model</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prompt in recent_l2 %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('edit_l2', prompt_id=prompt.id) }}" class="text-decoration-none">
+                                        #{{ prompt.id }}
+                                    </a>
+                                </td>
+                                <td>{{ prompt.Heading[:30] or 'No Heading' }}...</td>
+                                <td>{{ prompt.L1PromptDetails.L1_Prompt[:20] if prompt.L1PromptDetails else 'N/A' }}...</td>
+                                <td>{{ prompt.Model or 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No L2 prompts found</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('add_l1') }}" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Add L1 Prompt
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('add_l2') }}" class="btn btn-success w-100">
+                            <i class="bi bi-plus-circle"></i> Add L2 Prompt
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('l1_prompts') }}" class="btn btn-info w-100">
+                            <i class="bi bi-search"></i> Browse L1
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('l2_prompts') }}" class="btn btn-warning w-100">
+                            <i class="bi bi-search"></i> Browse L2
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
