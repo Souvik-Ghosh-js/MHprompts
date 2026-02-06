@@ -4,34 +4,49 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-1-circle"></i> L1 Prompts</h1>
+    <div>
+        <h1 class="mb-1"><i class="bi bi-1-circle me-2"></i> L1 Prompts</h1>
+        <p class="text-muted mb-0">Manage and view all Level 1 prompts</p>
+    </div>
     <a href="{{ url_for('add_l1') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Add New L1
+        <i class="bi bi-plus-circle me-2"></i> Add New L1
     </a>
 </div>
 
+
 <!-- Search and Filter -->
 <div class="card mb-4">
+    <div class="card-header bg-light">
+        <h7 class="mb-0"><i class="bi bi-funnel me-2"></i>Filter & Search</h7>
+    </div>
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-6">
-                <input type="text" class="form-control" name="search" placeholder="Search prompts or IDs..." 
-                       value="{{ search }}">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="search" placeholder="Search prompts or IDs..." 
+                           value="{{ search }}">
+                </div>
             </div>
             <div class="col-md-4">
-                <select class="form-select" name="client">
-                    <option value="">All Clients</option>
-                    {% for client in clients %}
-                    <option value="{{ client }}" {% if selected_client == client %}selected{% endif %}>
-                        {{ client }}
-                    </option>
-                    {% endfor %}
-                </select>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-building"></i></span>
+                    <select class="form-select" name="client">
+                        <option value="">All Clients</option>
+                        {% for client in clients %}
+                        <option value="{{ client }}" {% if selected_client == client %}selected{% endif %}>
+                            {{ client }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-search"></i> Filter
-                </button>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-1"></i> Apply
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -39,65 +54,98 @@
 
 <!-- Prompts Table -->
 <div class="card">
-    <div class="card-body">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>L1 Prompts List</h5>
+        <div>
+            <span class="badge bg-light text-dark">{{ prompts|length }} prompts</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-light">
+            <table class="table table-hover mb-0">
+                <thead>
                     <tr>
-                        <th>Prompt ID</th>
+                        <th class="ps-4">Prompt ID</th>
                         <th>Prompt Text</th>
                         <th>Client</th>
                         <th>Created On</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for prompt in prompts %}
-                    <tr>
-                        <td><strong>{{ prompt.PromptID }}</strong></td>
+                    <tr class="prompt-row" data-prompt-id="{{ prompt.PromptID }}">
+                        <td class="ps-4">
+                            <strong class="text-primary">{{ prompt.PromptID }}</strong>
+                            {% if prompt.ClientId %}
+                            <br><small class="text-muted">Client: {{ prompt.ClientId }}</small>
+                            {% endif %}
+                        </td>
                         <td>
-                            <div class="prompt-preview">
-                                {{ prompt.L1_Prompt[:100] }}
-                                {% if prompt.L1_Prompt|length > 100 %}...{% endif %}
+                            <div class="prompt-text-preview" style="max-width: 400px;">
+                                {{ prompt.L1_Prompt[:150] }}
+                                {% if prompt.L1_Prompt|length > 150 %}...{% endif %}
                             </div>
+                            <button class="btn btn-sm btn-link p-0 mt-1 view-prompt-btn" 
+                                    data-prompt-text="{{ prompt.L1_Prompt|escape }}">
+                                <small><i class="bi bi-eye me-1"></i>View Full</small>
+                            </button>
                         </td>
                         <td>
                             {% if prompt.ClientId %}
-                            <span class="badge bg-info">{{ prompt.ClientId }}</span>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info">{{ prompt.ClientId }}</span>
                             {% else %}
-                            <span class="text-muted">N/A</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">N/A</span>
                             {% endif %}
                         </td>
-                        <td>{{ prompt.CreatedOn[:10] }}</td>
                         <td>
-                            <span class="badge bg-{{ 'success' if prompt.IsActive == 'Y' else 'danger' }}">
+                            <small class="text-muted">{{ prompt.CreatedOn[:10] }}</small>
+                            <br>
+                            <small class="text-muted">{{ prompt.CreatedOn[11:16] }}</small>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill bg-{{ 'success' if prompt.IsActive == 'Y' else 'danger' }} bg-opacity-10 text-{{ 'success' if prompt.IsActive == 'Y' else 'danger' }} border border-{{ 'success' if prompt.IsActive == 'Y' else 'danger' }}">
+                                <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>
                                 {{ 'Active' if prompt.IsActive == 'Y' else 'Inactive' }}
                             </span>
                         </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary view-prompt-btn" 
+                                        data-prompt-text="{{ prompt.L1_Prompt|escape }}">
+                                    <i class="bi bi-eye"></i>
+                                    <span class="d-none d-md-inline">View</span>
+                                </button>
                                 <a href="{{ url_for('edit_l1', prompt_id=prompt.PromptID) }}" 
-                                   class="btn btn-outline-primary">
+                                   class="btn btn-outline-warning">
                                     <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{{ url_for('delete_l1', prompt_id=prompt.PromptID) }}" 
-                                   class="btn btn-outline-danger"
-                                   onclick="return confirm('Delete this prompt?')">
-                                    <i class="bi bi-trash"></i>
+                                    <span class="d-none d-md-inline">Edit</span>
                                 </a>
                                 <a href="{{ url_for('l2_prompts') }}?l1_prompt={{ prompt.PromptID }}" 
                                    class="btn btn-outline-info">
-                                    <i class="bi bi-eye"></i> View L2
+                                    <i class="bi bi-2-circle"></i>
+                                    <span class="d-none d-md-inline">L2</span>
+                                </a>
+                                <a href="{{ url_for('delete_l1', prompt_id=prompt.PromptID) }}" 
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('Are you sure you want to delete this prompt? This action cannot be undone.')">
+                                    <i class="bi bi-trash"></i>
                                 </a>
                             </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
-                            <i class="bi bi-inbox display-1"></i><br>
-                            No prompts found
+                        <td colspan="6" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="bi bi-inboxes display-1 text-muted mb-3"></i>
+                                <h5 class="text-muted mb-2">No prompts found</h5>
+                                <p class="text-muted mb-4">Try adjusting your search or filters</p>
+                                <a href="{{ url_for('add_l1') }}" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle me-2"></i> Add Your First Prompt
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -105,5 +153,182 @@
             </table>
         </div>
     </div>
+    {% if prompts %}
+    <div class="card-footer bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <small class="text-muted">
+                    Showing {{ prompts|length }} of {{ total_count or prompts|length }} prompts
+                </small>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Click "View" to see full prompt text
+                </small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<!-- Prompt View Modal -->
+<div class="modal fade" id="promptViewModal" tabindex="-1" aria-labelledby="promptViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="promptViewModalLabel">
+                    <i class="bi bi-eye me-2"></i>View L1 Prompt
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Prompt ID</label>
+                    <div class="form-control bg-light" id="modalPromptId">-</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Client</label>
+                    <div class="form-control bg-light" id="modalClientId">-</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Status</label>
+                    <div class="form-control bg-light" id="modalStatus">-</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Created On</label>
+                    <div class="form-control bg-light" id="modalCreatedOn">-</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Last Modified</label>
+                    <div class="form-control bg-light" id="modalLastModified">-</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Prompt Text</label>
+                    <div class="prompt-content-container">
+                        <pre class="prompt-content bg-light p-3 rounded" style="white-space: pre-wrap; max-height: 400px; overflow-y: auto; font-family: 'SF Mono', Monaco, 'Courier New', monospace;" id="modalPromptText"></pre>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-top">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <button class="btn btn-outline-primary w-100" onclick="copyPromptText()">
+                                <i class="bi bi-clipboard me-2"></i>Copy Text
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="#" class="btn btn-outline-warning w-100" id="editPromptLink">
+                                <i class="bi bi-pencil me-2"></i>Edit Prompt
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="#" class="btn btn-outline-info w-100" id="viewL2Link">
+                                <i class="bi bi-2-circle me-2"></i>View L2 Prompts
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// View prompt functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const viewButtons = document.querySelectorAll('.view-prompt-btn');
+    const modal = new bootstrap.Modal(document.getElementById('promptViewModal'));
+    
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const row = this.closest('.prompt-row');
+            const promptId = row ? row.dataset.promptId : '';
+            const promptText = this.dataset.promptText || '';
+            
+            // Find other data from the row
+            const clientId = row ? row.querySelector('.badge.bg-info')?.textContent.trim() || 'N/A' : 'N/A';
+            const statusBadge = row ? row.querySelector('.badge.bg-success, .badge.bg-danger') : null;
+            const status = statusBadge ? statusBadge.textContent.trim() : 'Unknown';
+            const statusClass = statusBadge ? (statusBadge.classList.contains('bg-success') ? 'Active' : 'Inactive') : 'Unknown';
+            const createdOn = row ? row.querySelector('td:nth-child(4) small:nth-child(1)')?.textContent.trim() || '-' : '-';
+            
+            // Set modal content
+            document.getElementById('modalPromptId').textContent = promptId;
+            document.getElementById('modalClientId').textContent = clientId;
+            document.getElementById('modalStatus').innerHTML = `
+                <span class="badge rounded-pill bg-${statusClass === 'Active' ? 'success' : 'danger'}">
+                    ${status}
+                </span>
+            `;
+            document.getElementById('modalCreatedOn').textContent = createdOn;
+            document.getElementById('modalLastModified').textContent = row ? 
+                row.querySelector('td:nth-child(4) small:nth-child(2)')?.textContent.trim() || '-' : '-';
+            document.getElementById('modalPromptText').textContent = promptText;
+            
+            // Set action links
+            document.getElementById('editPromptLink').href = `/l1/edit/${promptId}`;
+            document.getElementById('viewL2Link').href = `/l2-prompts?l1_prompt=${promptId}`;
+            
+            modal.show();
+        });
+    });
+});
+
+// Copy prompt text to clipboard
+function copyPromptText() {
+    const promptText = document.getElementById('modalPromptText').textContent;
+    navigator.clipboard.writeText(promptText).then(() => {
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check-circle me-2"></i>Copied!';
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy text to clipboard');
+    });
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('promptViewModal').classList.contains('show')) {
+        bootstrap.Modal.getInstance(document.getElementById('promptViewModal')).hide();
+    }
+});
+
+// Enhance table rows with hover effects
+document.querySelectorAll('.prompt-row').forEach(row => {
+    row.addEventListener('mouseenter', function() {
+        this.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+    });
+    
+    row.addEventListener('mouseleave', function() {
+        this.style.backgroundColor = '';
+    });
+});
+
+// Prompt text length indicator
+document.querySelectorAll('.prompt-text-preview').forEach(preview => {
+    const fullText = preview.textContent;
+    if (fullText.length > 150) {
+        const lengthBadge = document.createElement('span');
+        lengthBadge.className = 'badge bg-light text-dark ms-2';
+        lengthBadge.innerHTML = `${fullText.length} chars`;
+        preview.parentNode.appendChild(lengthBadge);
+    }
+});
+</script>
 {% endblock %}
